@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KNN and Simple Averaging Smoothing</title>
+    <style>
+        .container { width: 50%; margin: auto; text-align: center; }
+        img { max-width: 100%; height: auto; }
+        .input-group { margin: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>KNN and Simple Averaging Smoothing</h1>
+
+    <!-- File upload form -->
+    <form method="POST" enctype="multipart/form-data">
+        <div class="input-group">
+            <label>Upload Image:</label>
+            <input type="file" name="image" accept="image/*" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="window_size">Window Size:</label>
+            <input type="number" id="window_size" name="window_size" required>
+        </div>
+
+        <div class="input-group">
+            <label for="k_value">k Value:</label>
+            <input type="number" id="k_value" name="k_value" required>
+        </div>
+
+        <div class="input-group">
+            <button type="submit">Run</button>
+        </div>
+    </form>
+
+    <!-- Display messages (e.g., if an error occurs) -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Display images if processed -->
+    {% if original_image %}
+        <h3>Original Image</h3>
+        <img src="{{ original_image }}" alt="Original Image">
+        <h3>KNN Smoothed Image</h3>
+        <img src="{{ knn_image }}" alt="KNN Smoothed Image">
+        <h3>Simple Averaging Smoothed Image</h3>
+        <img src="{{ avg_image }}" alt="Simple Averaging Smoothed Image">
+        <h3>Difference Image</h3>
+        <img src="{{ diff_image }}" alt="Difference Image">
+    {% endif %}
+</div>
+
+</body>
+</html>
