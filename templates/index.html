@@ -5,15 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KNN and Simple Averaging Smoothing</title>
     <style>
-        .container { width: 50%; margin: auto; text-align: center; }
-        img { max-width: 100%; height: auto; }
+        .container { width: 80%; margin: auto; text-align: center; }
         .input-group { margin: 10px; }
+        .image-row { display: flex; justify-content: space-around; margin-top: 20px; }
+        .image-container { text-align: center; }
+        img { max-width: 100%; height: auto; max-height: 300px; }
+        .label { font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>KNN and Simple Averaging Smoothing</h1>
+    <h1>Image Smoothing WebApp</h1>
 
     <!-- File upload form -->
     <form method="POST" enctype="multipart/form-data">
@@ -37,7 +40,7 @@
         </div>
     </form>
 
-    <!-- Display messages (e.g., if an error occurs) -->
+    <!-- Display flash messages for errors -->
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <ul>
@@ -50,14 +53,24 @@
 
     <!-- Display images if processed -->
     {% if original_image %}
-        <h3>Original Image</h3>
-        <img src="{{ original_image }}" alt="Original Image">
-        <h3>KNN Smoothed Image</h3>
-        <img src="{{ knn_image }}" alt="KNN Smoothed Image">
-        <h3>Simple Averaging Smoothed Image</h3>
-        <img src="{{ avg_image }}" alt="Simple Averaging Smoothed Image">
-        <h3>Difference Image</h3>
-        <img src="{{ diff_image }}" alt="Difference Image">
+    <div class="image-row">
+        <div class="image-container">
+            <img src="{{ original_image }}" alt="Original Image">
+            <p class="label">Original Image</p>
+        </div>
+        <div class="image-container">
+            <img src="{{ knn_image }}" alt="KNN Smoothed Image">
+            <p class="label">KNN Smoothed Image</p>
+        </div>
+        <div class="image-container">
+            <img src="{{ avg_image }}" alt="Averaging Smoothed Image">
+            <p class="label">Averaging Smoothed Image</p>
+        </div>
+        <div class="image-container">
+            <img src="{{ diff_image }}" alt="Difference Image">
+            <p class="label">Difference Image</p>
+        </div>
+    </div>
     {% endif %}
 </div>
 

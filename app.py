@@ -3,45 +3,41 @@ from flask import Flask, render_template, request, send_from_directory, redirect
 from werkzeug.utils import secure_filename
 import numpy as np
 from PIL import Image
-from knn_smooth import KNNSmooth  # Assume this is implemented as per your Tkinter code
-from avg_smooth import SimpleAveragingSmooth  # Assume this is implemented as per your Tkinter code
+from knn_smooth import KNNSmooth  # Assume KNNSmooth is implemented as per your code
+from avg_smooth import SimpleAveragingSmooth  # Assume SimpleAveragingSmooth is implemented as per your code
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key"  # For flash messages
+app.secret_key = "your_secret_key"
 
-# Folder to save uploaded and processed images
 UPLOAD_FOLDER = 'static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Route for homepage
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        # Get file and inputs from form
         file = request.files.get("image")
         window_size = request.form.get("window_size")
         k_value = request.form.get("k_value")
         
-        # Validate inputs
+        # Input validation
         if not file or file.filename == "":
             flash("No file selected.")
             return redirect(request.url)
-        
         if not window_size.isdigit() or not k_value.isdigit():
             flash("Please enter valid numeric values for window size and k value.")
             return redirect(request.url)
 
-        # Process inputs
+        # Convert input to integers
         window_size = int(window_size)
         k_value = int(k_value)
         
-        # Save uploaded file
+        # Save the uploaded file
         filename = secure_filename(file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
 
-        # Open image, convert to grayscale, and apply smoothing
+        # Open image and convert to grayscale for processing
         original_image = Image.open(file_path).convert("L")
         im_arr = np.array(original_image)
 
@@ -74,8 +70,6 @@ def index():
             knn_image=url_for("static", filename=f"images/knn_{filename}"),
             avg_image=url_for("static", filename=f"images/avg_{filename}"),
             diff_image=url_for("static", filename=f"images/diff_{filename}"),
-            window_size=window_size,
-            k_value=k_value
         )
 
     return render_template("index.html")
