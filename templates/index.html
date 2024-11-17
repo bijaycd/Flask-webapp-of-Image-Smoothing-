@@ -3,23 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KNN and Simple Averaging Smoothing</title>
+    <title>Image Smoothing Web App</title>
     <style>
-        .container { width: 80%; margin: auto; text-align: center; }
-        .input-group { margin: 10px; }
-        .image-row { display: flex; justify-content: space-around; margin-top: 20px; }
-        .image-container { text-align: center; }
-        img { max-width: 100%; height: auto; max-height: 300px; }
-        .label { font-weight: bold; margin-top: 10px; }
+        body {
+            background-image: url("{{ url_for('static', filename='assets/background.jpeg') }}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            text-align: center;
+            margin-top: 50px;
+            background-color: rgba(255, 255, 255, 0.8); /* White background with transparency */
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            margin: auto;
+        }
+
+        h1 {
+            color: #00008B; /* Dark Blue */
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin: 15px 0; /* Increase spacing between form elements */
+        }
+
+        img { 
+            max-width: 100%; 
+            height: auto; 
+            max-height: 300px; 
+        }
+
+        .image-row { 
+            display: flex; 
+            justify-content: space-around; 
+            margin-top: 20px; 
+        }
+
+        .image-container { 
+            text-align: center; 
+        }
+
+        .label { 
+            font-weight: bold; 
+            margin-top: 10px; 
+        }
+
+        .loading-bar { 
+            display: none; 
+            margin-top: 20px; 
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #00008B; /* Dark blue button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #000066; /* Darker blue on hover */
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Image Smoothing WebApp</h1>
+    <h1>Image Smoothing Web App</h1>
 
-    <!-- File upload form -->
-    <form method="POST" enctype="multipart/form-data">
+    <!-- File upload form with increased spacing between fields -->
+    <form id="uploadForm" enctype="multipart/form-data">
         <div class="input-group">
             <label>Upload Image:</label>
             <input type="file" name="image" accept="image/*" required>
@@ -31,7 +92,7 @@
         </div>
 
         <div class="input-group">
-            <label for="k_value">k Value:</label>
+            <label for="k_value">K-Value:</label>
             <input type="number" id="k_value" name="k_value" required>
         </div>
 
@@ -40,39 +101,68 @@
         </div>
     </form>
 
-    <!-- Display flash messages for errors -->
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul>
-          {% for message in messages %}
-            <li>{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+    <!-- Loading bar -->
+    <div class="loading-bar" id="loadingBar">
+        <p>Processing...</p>
+        <progress></progress>
+    </div>
 
     <!-- Display images if processed -->
-    {% if original_image %}
-    <div class="image-row">
+    <div class="image-row" id="imageRow" style="display: none;">
         <div class="image-container">
-            <img src="{{ original_image }}" alt="Original Image">
+            <img id="originalImage" src="" alt="Original Image">
             <p class="label">Original Image</p>
         </div>
         <div class="image-container">
-            <img src="{{ knn_image }}" alt="KNN Smoothed Image">
+            <img id="knnImage" src="" alt="KNN Smoothed Image">
             <p class="label">KNN Smoothed Image</p>
         </div>
         <div class="image-container">
-            <img src="{{ avg_image }}" alt="Averaging Smoothed Image">
+            <img id="avgImage" src="" alt="Averaging Smoothed Image">
             <p class="label">Averaging Smoothed Image</p>
         </div>
         <div class="image-container">
-            <img src="{{ diff_image }}" alt="Difference Image">
+            <img id="diffImage" src="" alt="Difference Image">
             <p class="label">Difference Image</p>
         </div>
     </div>
-    {% endif %}
 </div>
+
+<script>
+    // Handle form submission
+    document.getElementById("uploadForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        // Show loading bar
+        document.getElementById("loadingBar").style.display = "block";
+        document.getElementById("imageRow").style.display = "none";
+
+        // Create FormData and send request with AJAX
+        const formData = new FormData(this);
+        
+        fetch("/", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Hide loading bar
+            document.getElementById("loadingBar").style.display = "none";
+
+            // Display processed images
+            document.getElementById("originalImage").src = data.original_image;
+            document.getElementById("knnImage").src = data.knn_image;
+            document.getElementById("avgImage").src = data.avg_image;
+            document.getElementById("diffImage").src = data.diff_image;
+            document.getElementById("imageRow").style.display = "flex";
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            document.getElementById("loadingBar").style.display = "none";
+            alert("An error occurred while processing the image.");
+        });
+    });
+</script>
 
 </body>
 </html>

@@ -1,14 +1,13 @@
 import os
-from flask import Flask, render_template, request, send_from_directory, redirect, url_for, flash
+from flask import Flask, render_template, request, jsonify, url_for
 from werkzeug.utils import secure_filename
 import numpy as np
 from PIL import Image
-from knn_smooth import KNNSmooth  # Assume KNNSmooth is implemented as per your code
-from avg_smooth import SimpleAveragingSmooth  # Assume SimpleAveragingSmooth is implemented as per your code
+from knn_smooth import KNNSmooth
+from avg_smooth import SimpleAveragingSmooth
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
-
 UPLOAD_FOLDER = 'static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -19,19 +18,17 @@ def index():
         file = request.files.get("image")
         window_size = request.form.get("window_size")
         k_value = request.form.get("k_value")
-        
+
         # Input validation
         if not file or file.filename == "":
-            flash("No file selected.")
-            return redirect(request.url)
+            return jsonify({"error": "No file selected"}), 400
         if not window_size.isdigit() or not k_value.isdigit():
-            flash("Please enter valid numeric values for window size and k value.")
-            return redirect(request.url)
+            return jsonify({"error": "Please enter valid numeric values for window size and k value."}), 400
 
         # Convert input to integers
         window_size = int(window_size)
         k_value = int(k_value)
-        
+
         # Save the uploaded file
         filename = secure_filename(file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -63,14 +60,13 @@ def index():
         diff_img_path = os.path.join(app.config['UPLOAD_FOLDER'], f"diff_{filename}")
         diff_img.save(diff_img_path)
 
-        # Pass results to template
-        return render_template(
-            "index.html",
-            original_image=url_for("static", filename=f"images/{filename}"),
-            knn_image=url_for("static", filename=f"images/knn_{filename}"),
-            avg_image=url_for("static", filename=f"images/avg_{filename}"),
-            diff_image=url_for("static", filename=f"images/diff_{filename}"),
-        )
+        # Return JSON response
+        return jsonify({
+            "original_image": url_for("static", filename=f"images/{filename}"),
+            "knn_image": url_for("static", filename=f"images/knn_{filename}"),
+            "avg_image": url_for("static", filename=f"images/avg_{filename}"),
+            "diff_image": url_for("static", filename=f"images/diff_{filename}")
+        })
 
     return render_template("index.html")
 
